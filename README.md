@@ -13,3 +13,51 @@ The image above shows the before and after (before at the top, the after is belo
 The output of kubectl get pods,services -n kube-system didn't list the pods/services we explicitly created because those were created in the default namespace, while the -n kube-system command only shows resources in the kube-system namespace. Kubernetes uses namespaces to logically separate and organize resources which provides isolation between different applications or environments.
 
 But if i ran kubectl get services and kubectl get pods then it showed resources in the default namespace, which included our hello-node deployment and service.
+
+
+
+![alt text](image-2.png)
+
+![alt text](image-3.png)
+
+### 3. What is the difference between Rolling Update and Recreate deployment strategy?
+
+In a Rolling Update, Kubernetes replaces Pods one by one so the application stays available throughout the upgrade. Roll back is an option if something goes wrong. By contrast, the Recreate strategy tears down all old Pods before bringing up the new ones, which creates a window of downtime but guarantees there are never two versions running at the same time. Rolling updates minimize service disruption, whereas Recreate is simpler and sometimes necessary if two versions cannot coexist, for example, when they share a PVC.
+
+### 4. Deploying the Spring Petclinic REST App with Recreate
+
+First I applied the rolling-update Deployment and Service by:
+
+```bash
+kubectl apply -f deployment.yaml
+
+kubectl apply -f service.yaml
+```
+
+Next, I applied the recreate Deployment and its Service:
+
+```bash
+kubectl apply -f deployment-recreate.yaml
+
+kubectl apply -f service-recreate.yaml
+```
+
+![alt text](<Screenshot 2025-05-30 095008.png>)
+
+Then I watched until they all reached Running/Ready with kubectl get pods -o wide. After that i confirmed that both Deployments and Services exist with kubectl get deployments and kubectl get services
+
+![alt text](image-5.png)
+
+Both sets of Pods reached Running and Ready states within a minute, and I could verify in the logs that traffic to each Service was being properly routed.
+
+### 5. Reflection on Manifest-Driven Deployments
+
+Initial Pod Creation: Seeing ContainerCreating reminds us that Pods go through a startup phase—image pull, volume mount, network setup—before serving traffic. It’s normal to see 0/1 until that completes.
+
+Rolling Update vs. Recreate: Rolling Update replaced Pods one at a time: no downtime seen once all new Pods were up. Meanwhile recreate terminated all old Pods first, causing a brief outage while the new Pods spun up.
+
+Clarity & Reproducibility: Keeping these YAMLs in Git means anyone can reproduce the cluster with kubectl apply -f, and rollbacks are as simple as reverting the manifest.
+
+CI/CD Integration: Declarative files integrate seamlessly with pipelines: linting, validation, and automated deploys ensure consistency across environments.
+
+By calling out that initial “ContainerCreating” status and then showing how you confirmed the Pods became Running, this write-up both documents the full lifecycle and demonstrates your understanding of Kubernetes startup behavior.
