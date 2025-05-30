@@ -52,12 +52,12 @@ Both sets of Pods reached Running and Ready states within a minute, and I could 
 
 ### 5. Reflection on Manifest-Driven Deployments
 
-Initial Pod Creation: Seeing ContainerCreating reminds us that Pods go through a startup phase—image pull, volume mount, network setup—before serving traffic. It’s normal to see 0/1 until that completes.
+Initial Pod Creation: Seeing ContainerCreating reminds us that Pods go through a startup phase image pull, volume mount, network setup—before serving traffic. 
 
-Rolling Update vs. Recreate: Rolling Update replaced Pods one at a time: no downtime seen once all new Pods were up. Meanwhile recreate terminated all old Pods first, causing a brief outage while the new Pods spun up.
+Rolling Update vs. Recreate: Rolling Update replaced Pods one at a time, no downtime seen once all new Pods were up. Meanwhile recreate terminated all old Pods first, causing a brief outage while the new Pods spun up.
 
 Clarity & Reproducibility: Keeping these YAMLs in Git means anyone can reproduce the cluster with kubectl apply -f, and rollbacks are as simple as reverting the manifest.
 
 CI/CD Integration: Declarative files integrate seamlessly with pipelines: linting, validation, and automated deploys ensure consistency across environments.
 
-By calling out that initial “ContainerCreating” status and then showing how you confirmed the Pods became Running, this write-up both documents the full lifecycle and demonstrates your understanding of Kubernetes startup behavior.
+Overall, manifest files turned a manual and error-prone process into a repeatable and auditable workflow that scales far better than one-off kubectl commands.
